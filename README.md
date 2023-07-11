@@ -1,1 +1,1 @@
-# labirinto-el-trico
+Código do Labirinto Elétrico desenvolvido para a disciplina de Projeto Integrador, o objetivo do jogo é passar o aro pelo percurso de metal sem tocá-lo, pois se o fizer, o som é acionado e aumenta conforme o número de toques
