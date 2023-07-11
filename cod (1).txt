@@ -1,0 +1,112 @@
+#include<LiquidCrystal.h>
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+
+// led dos niveis
+int PinLed1 = 6;
+int PinLed2 = 7;
+int PinLed3 = 13;
+
+int PinLed = 0;
+// Saída digital do labirinto
+int pinoLabirinto = 10;
+// Saída digital do buzzer
+int pinoBuzzer = 9;
+// Saída digital da sirene
+int pinoSirene = 8;
+// Contador para o Buzzer e Leds
+int nivel = 0;
+// Variáveis para controle do tempo
+long int tempoAnterior = 0;
+int deltaT = 200;
+// Velocidade do Buzzer
+int tomBuzzer = 3000;
+int estadoBotao = LOW;
+int estadoBuzzer = LOW;
+void setup() {
+  lcd.begin(16, 2);
+  // Pinos de entrada:
+  pinMode(pinoLabirinto, INPUT_PULLUP);  //utilizamos o resistor interno pull - up do Arduino
+      // Pinos de saída:
+  pinMode(PinLed, OUTPUT);
+  pinMode(PinLed1	, OUTPUT);
+  pinMode(PinLed2 , OUTPUT);
+  pinMode(PinLed3 , OUTPUT);
+  digitalWrite(PinLed1, 0);
+  digitalWrite(PinLed2, 0);
+  digitalWrite(PinLed3, 0);
+  pinMode(pinoBuzzer, OUTPUT);
+  pinMode(pinoSirene, OUTPUT);
+  digitalWrite(PinLed, 1);
+  digitalWrite(pinoSirene, HIGH);  //noTone(pinoSirene);
+  Serial.begin(9600);
+}
+void loop() {
+  
+  if (nivel == 0) {
+    lcd.setCursor(0,0);          
+    lcd.print("Bem Vindo"); 
+    lcd.setCursor(2,1);           
+    lcd.print("GO!!!!!!");
+  }  
+  estadoBotao = digitalRead(pinoLabirinto);
+  Serial.println(nivel);
+  if (estadoBotao == LOW) {
+    delay(50);
+    estadoBotao = digitalRead(pinoLabirinto);
+    while (!digitalRead(pinoLabirinto)) {
+      delay(1);
+    }
+    if (estadoBotao == LOW) {
+      nivel ++;
+    }
+  }
+  if (nivel == 1) {
+    deltaT = 100;
+    digitalWrite(PinLed1, 1);
+    lcd.setCursor(0,0);          
+    lcd.print("Nivel 1"); 
+    lcd.setCursor(2,1);           
+    lcd.print("Cuidado");
+    tomBuzzer = 3500;
+  }
+  if (nivel == 2) {
+    deltaT = 50;
+    digitalWrite(PinLed2, 1);
+    lcd.setCursor(0,0);          
+    lcd.print("Nivel 2"); 
+    lcd.setCursor(2,1);           
+    lcd.print("Cuidado");
+    tomBuzzer = 4000;
+  }
+  if (nivel == 3) {
+    tomBuzzer = 5000;
+    digitalWrite(PinLed3, 1);
+    lcd.setCursor(0,0);          
+    lcd.print("Nivel 3"); 
+    lcd.setCursor(2,1);           
+    lcd.print("Cuidado");    
+    digitalWrite(pinoSirene, LOW);  //tone(pinoSirene, 4000);
+  }
+  if (nivel == 4) {
+    nivel = 0;
+    tomBuzzer = 3000;
+    noTone(pinoBuzzer);
+    digitalWrite(pinoSirene, 1);
+    digitalWrite(PinLed1, 0);
+    digitalWrite(PinLed2, 0);
+    digitalWrite(PinLed3, 0);
+    lcd.clear();
+  }
+  if (((millis() - tempoAnterior) > deltaT) && (nivel >= 1)) {
+    if (estadoBuzzer) {
+      // liga buzzer
+      tone(pinoBuzzer, tomBuzzer);
+      lcd.clear();
+    } else {
+      // desliga o buzzer
+      noTone(pinoBuzzer);
+    }
+    estadoBuzzer = !estadoBuzzer;
+    tempoAnterior = millis();
+  }
+}
